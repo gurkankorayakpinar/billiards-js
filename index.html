@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billiards JS</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="game-container">
+        <div id="ui-container">
+            <div class="power-control">
+                <span class="label">Vuruş Şiddeti (1-5):</span>
+                <div class="power-bar-wrapper">
+                    <div id="power-bar"></div>
+                </div>
+                <span id="power-value">5</span>
+            </div>
+        </div>
+
+        <div id="main-layout">
+            <div id="combo-counters">
+                <div class="counter-box red">0x: <span id="count0x">0/1</span></div>
+                <div class="counter-box red">1x: <span id="count1x">0/5</span></div>
+                <div class="counter-box">2x: <span id="count2x">0</span></div>
+                <div class="counter-box">3x: <span id="count3x">0</span></div>
+                <div class="counter-box">4x: <span id="count4x">0</span></div>
+                <div class="counter-box">5x: <span id="count5x">0</span></div>
+                <div class="counter-box">6x: <span id="count6x">0</span></div>
+                <div class="counter-box blue-panel">7x+: <span id="count7x">0/5</span></div>
+            </div>
+
+            <div id="canvas-wrapper">
+                <canvas id="gameCanvas" width="900" height="600"></canvas>
+                <div id="restart-container">
+                    <button id="restartBtn" disabled>TEKRAR OYNA</button>
+                </div>
+            </div>
+
+            <div id="turn-counter-panel">
+                <div class="counter-box turn">Tur: <span id="turnCount">1/50</span></div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
