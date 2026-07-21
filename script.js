@@ -37,7 +37,8 @@ let isTurnActive = false;
 let gameOverState = "PLAYING";
 let hitCountThisTurn = 0;
 
-const ballColors = ['#ffffff', '#ff3333', '#ffcc00', '#00bfff', '#00008b', '#808080', '#222222', '#ff6600', '#2e7d32'];
+const ballColors = ['#ffffff', '#ff3333', '#ffcc00', '#00bfff', '#00008b', '#9c27b0', '#222222', '#ff6600', '#2e7d32'];
+
 let balls = [];
 const ballRadius = 14;
 
@@ -52,6 +53,43 @@ class Ball {
         this.color = color;
         this.isWhite = isWhite;
         this.mass = 1;
+
+        const v = 0.577;
+        this.points = isWhite ? [] : [
+            { x: v, y: v, z: v }, { x: v, y: v, z: -v },
+            { x: v, y: -v, z: v }, { x: v, y: -v, z: -v },
+            { x: -v, y: v, z: v }, { x: -v, y: v, z: -v },
+            { x: -v, y: -v, z: v }, { x: -v, y: -v, z: -v }
+        ];
+
+        if (!this.isWhite) {
+            this.randomizeOrientation();
+        }
+    }
+
+    randomizeOrientation() {
+        const angleX = Math.random() * Math.PI * 2;
+        const angleY = Math.random() * Math.PI * 2;
+        const angleZ = Math.random() * Math.PI * 2;
+
+        const rotate = (p, ax, ay, az) => {
+            let cosX = Math.cos(ax), sinX = Math.sin(ax);
+            let y1 = p.y * cosX - p.z * sinX;
+            let z1 = p.y * sinX + p.z * cosX;
+            p.y = y1; p.z = z1;
+
+            let cosY = Math.cos(ay), sinY = Math.sin(ay);
+            let x2 = p.x * cosY + p.z * sinY;
+            let z2 = -p.x * sinY + p.z * cosY;
+            p.x = x2; p.z = z2;
+
+            let cosZ = Math.cos(az), sinZ = Math.sin(az);
+            let x3 = p.x * cosZ - p.y * sinZ;
+            let y3 = p.x * sinZ + p.y * cosZ;
+            p.x = x3; p.y = y3;
+        };
+
+        this.points.forEach(p => rotate(p, angleX, angleY, angleZ));
     }
 
     draw() {
@@ -64,16 +102,55 @@ class Ball {
         ctx.strokeStyle = this.color === '#222222' ? '#444444' : 'rgba(0,0,0,0.15)';
         ctx.stroke();
 
-        ctx.beginPath();
-        ctx.arc(this.x - this.radius * 0.35, this.y - this.radius * 0.35, this.radius * 0.25, 0, Math.PI * 2);
-        ctx.fillStyle = this.color === '#ffffff' ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.3)';
-        ctx.fill();
-        ctx.closePath();
+        this.points.forEach(p => {
+            if (p.z > 0) {
+                ctx.beginPath();
+                let spotX = this.x + p.x * this.radius * 0.8;
+                let spotY = this.y + p.y * this.radius * 0.8;
+                let spotSize = this.radius * 0.12 * p.z;
+
+                ctx.arc(spotX, spotY, spotSize, 0, Math.PI * 2);
+
+                if (this.color === '#00008b' || this.color === '#222222') {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                } else {
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+                }
+
+                ctx.fill();
+                ctx.closePath();
+            }
+        });
     }
 
     update() {
         this.x += this.vx;
         this.y += this.vy;
+
+        const speed = Math.hypot(this.vx, this.vy);
+        if (speed > 0.02 && this.points.length > 0) {
+            const rotSpeed = speed / this.radius;
+            const ax = -this.vy / speed;
+            const ay = this.vx / speed;
+
+            const cosA = Math.cos(rotSpeed);
+            const sinA = Math.sin(rotSpeed);
+
+            this.points.forEach(p => {
+                const nx = (cosA + ax * ax * (1 - cosA)) * p.x + (ax * ay * (1 - cosA)) * p.y + (ay * sinA) * p.z;
+                const ny = (ax * ay * (1 - cosA)) * p.x + (cosA + ay * ay * (1 - cosA)) * p.y + (-ax * sinA) * p.z;
+                const nz = (-ay * sinA) * p.x + (ax * sinA) * p.y + cosA * p.z;
+
+                p.x = nx;
+                p.y = ny;
+                p.z = nz;
+
+                const len = Math.hypot(p.x, p.y, p.z);
+                p.x /= len;
+                p.y /= len;
+                p.z /= len;
+            });
+        }
 
         this.vx *= friction;
         this.vy *= friction;
@@ -187,14 +264,14 @@ window.addEventListener('keydown', (e) => {
     }
 });
 
-canvas.addEventListener('mousemove', (e) => {
+window.addEventListener('mousemove', (e) => {
     if (gameOverState !== "PLAYING") return;
     const rect = canvas.getBoundingClientRect();
     mouseX = e.clientX - rect.left;
     mouseY = e.clientY - rect.top;
 });
 
-canvas.addEventListener('mousedown', () => {
+window.addEventListener('mousedown', () => {
     if (gameOverState !== "PLAYING") return;
     const allStopped = balls.every(ball => ball.vx === 0 && ball.vy === 0);
 
@@ -215,6 +292,11 @@ canvas.addEventListener('mousedown', () => {
             whiteBall.vy = dirY * speedMultiplier;
         }
     }
+});
+
+// "Sağ tık ile menü açma" özelliği devre dışı
+document.addEventListener('contextmenu', (event) => {
+    event.preventDefault();
 });
 
 restartBtn.addEventListener('click', () => {
@@ -253,6 +335,17 @@ function animate() {
 
     const allStopped = balls.every(ball => ball.vx === 0 && ball.vy === 0);
 
+    if (allStopped && gameOverState === "PLAYING") {
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([5, 5]);
+        ctx.moveTo(whiteBall.x, whiteBall.y);
+        ctx.lineTo(mouseX, mouseY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+
     if (isTurnActive && allStopped) {
         isTurnActive = false;
 
@@ -289,17 +382,6 @@ function animate() {
                 turnCountEl.textContent = `${currentTurn}/${maxTurns}`;
             }
         }
-    }
-
-    if (allStopped && gameOverState === "PLAYING") {
-        ctx.beginPath();
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
-        ctx.lineWidth = 1.5;
-        ctx.setLineDash([5, 5]);
-        ctx.moveTo(whiteBall.x, whiteBall.y);
-        ctx.lineTo(mouseX, mouseY);
-        ctx.stroke();
-        ctx.setLineDash([]);
     }
 
     if (gameOverState !== "PLAYING") {
