@@ -20,4 +20,4 @@
 
 - Vuruş şiddeti 1-5 arasında ayarlanmış olup, default olarak 5 (en güçlü) ile başlamaktadır. Vuruş şiddetini; 1, 2, 3, 4 ve 5 tuşları ile ayarlanmaktadır.
 
-- Oyun 2 boyutlu olmakla birlikte, topların 3 boyutlu hareket etmeleri sağlanmıştır.
+- Oyun 2D olmakla birlikte, topların 3D hareket etmeleri sağlanmıştır.
