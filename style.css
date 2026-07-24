@@ -1,0 +1,147 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+}
+
+body {
+    background-color: #1a1a1a;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+#game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-top: -30px;
+}
+
+#top-ui {
+    width: 900px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ui-box {
+    background: #2a2a2a;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border: 1px solid #333;
+}
+
+.label {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+#power-segments {
+    display: flex;
+    gap: 4px;
+}
+
+.segment {
+    width: 25px;
+    height: 12px;
+    background-color: #444;
+    border-radius: 2px;
+    transition: background-color 0.1s ease;
+}
+
+.segment.active {
+    background-color: #2196f3;
+}
+
+#power-value {
+    font-size: 18px;
+    font-weight: bold;
+    background: #444;
+    padding: 2px 10px;
+    border-radius: 4px;
+    min-width: 35px;
+    text-align: center;
+}
+
+#main-layout {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+#canvas-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+#gameCanvas {
+    background-color: #134e32;
+    border: 14px solid #4a2e1b;
+    border-radius: 6px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    cursor: default;
+    display: block;
+}
+
+.counter-box {
+    background: rgba(0, 0, 0, 0.75);
+    padding: 6px 14px;
+    border-radius: 5px;
+    font-size: 13px;
+    font-weight: 600;
+    width: 125px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.counter-box.turn {
+    border-left: 4px solid #2196f3;
+    text-align: center;
+}
+
+.counter-box span {
+    color: #fff;
+    float: right;
+    margin-left: 5px;
+}
+
+#restart-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+#restartBtn {
+    padding: 10px 24px;
+    font-size: 15px;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #2196f3;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+#restartBtn:hover:not(:disabled) {
+    background-color: #1e88e5;
+}
+
+#restartBtn:disabled {
+    background-color: #333333;
+    color: #777777;
+    cursor: not-allowed;
+    box-shadow: none;
+    opacity: 0.5;
+}

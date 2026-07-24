@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billiards JS</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="game-container">
+        <div id="top-ui">
+            <div id="power-panel" class="ui-box">
+                <span class="label">Vuruş Şiddeti (1-5):</span>
+                <div id="power-segments">
+                    <div class="segment"></div>
+                    <div class="segment"></div>
+                    <div class="segment"></div>
+                    <div class="segment"></div>
+                    <div class="segment"></div>
+                </div>
+                <span id="power-value">5</span>
+            </div>
+
+            <div id="turn-panel" class="ui-box">
+                <div class="counter-box turn">Tur: <span id="turnCount">1/50</span></div>
+            </div>
+        </div>
+
+        <div id="main-layout">
+            <div id="canvas-wrapper">
+                <canvas id="gameCanvas" width="900" height="600"></canvas>
+                <div id="restart-container">
+                    <button id="restartBtn" disabled>TEKRAR OYNA</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
+
+<!-- GKA -->
