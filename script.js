@@ -2,6 +2,7 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const powerValueElement = document.getElementById('power-value');
 const powerSegments = document.querySelectorAll('.segment');
+const powerSegmentsContainer = document.getElementById('power-segments');
 const restartBtn = document.getElementById('restartBtn');
 const turnCountEl = document.getElementById('turnCount');
 
@@ -178,7 +179,8 @@ function initGame() {
     isTurnActive = false;
     gameOverState = "PLAYING";
 
-    updatePower(5);
+    powerSegmentsContainer.classList.add('first-hit');
+    updatePower(7);
 
     turnCountEl.textContent = `1/${maxTurns}`;
     restartBtn.disabled = true;
@@ -189,21 +191,22 @@ function initGame() {
     const startX = 600;
     const startY = canvas.height / 2;
     const spacing = 1.05;
-    let ballIdx = 1;
 
+    let ballIndices = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+    for (let i = ballIndices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [ballIndices[i], ballIndices[j]] = [ballIndices[j], ballIndices[i]];
+    }
+
+    let listIdx = 0;
     for (let row = 0; row < 5; row++) {
         for (let col = 0; col <= row; col++) {
-            let x = startX + row * (ballRadius * 2 * 0.9);
-            let y = startY + (col - row / 2) * (ballRadius * 2 * spacing);
+            let x = startX + row * (ballRadius * 2 * 0.9) + (Math.random() - 0.5) * 0.5;
+            let y = startY + (col - row / 2) * (ballRadius * 2 * spacing) + (Math.random() - 0.5) * 0.5;
 
-            let color;
-            if (row === 2 && col === 1) {
-                color = ballColors[8];
-            } else {
-                color = ballColors[ballIdx === 8 ? 15 : ballIdx];
-                ballIdx++;
-            }
+            let color = ballColors[ballIndices[listIdx]];
             balls.push(new Ball(balls.length, x, y, ballRadius, color));
+            listIdx++;
         }
     }
 
@@ -250,7 +253,7 @@ function updatePower(level) {
 }
 
 window.addEventListener('keydown', (e) => {
-    if (gameOverState !== "PLAYING") return;
+    if (gameOverState !== "PLAYING" || currentTurn === 1) return;
     if (['1', '2', '3', '4', '5'].includes(e.key)) {
         updatePower(parseInt(e.key));
     }
@@ -394,6 +397,11 @@ function animate() {
             }
 
             if (gameOverState === "PLAYING") {
+                if (currentTurn === 1) {
+                    powerSegmentsContainer.classList.remove('first-hit');
+                    updatePower(3);
+                }
+
                 if (currentTurn >= maxTurns) {
                     gameOverState = "LOST";
                 } else {

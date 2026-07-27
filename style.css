@@ -49,6 +49,27 @@ body {
 #power-segments {
     display: flex;
     gap: 4px;
+    width: 141px;
+    /* 5 adet 25px segment + 4 adet 4px gap = 141px */
+}
+
+#power-segments.first-hit {
+    gap: 0;
+}
+
+#power-segments.first-hit .segment {
+    flex: 1;
+    border-radius: 0;
+}
+
+#power-segments.first-hit .segment:first-child {
+    border-top-left-radius: 2px;
+    border-bottom-left-radius: 2px;
+}
+
+#power-segments.first-hit .segment:last-child {
+    border-top-right-radius: 2px;
+    border-bottom-right-radius: 2px;
 }
 
 .segment {

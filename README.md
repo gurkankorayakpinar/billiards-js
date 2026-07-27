@@ -12,6 +12,8 @@
 
 - Beyaz topun isabet edeceği topun izleyeceği tahmini yol, sarı çizgi ile gösterilmektedir.
 
-- Vuruş şiddeti 1-5 arasında ayarlanmış olup, default olarak 5 (en güçlü) ile başlamaktadır. Vuruş şiddetini ayarlamak için 1, 2, 3, 4 ve 5 tuşları kullanılmalıdır.
+- İlk tur için vuruş şiddeti 7 olarak ayarlanmıştır. Sonraki turlar içinse vuruş şiddetinin 1-5 arasında olması sağlanmış olup, default olarak 3 şiddeti seçilmiştir. Vuruş şiddetini ayarlamak için 1, 2, 3, 4 ve 5 tuşları kullanılmalıdır.
+
+- Topların başlangıç dizilimi her defasında üçgen olmakla birlikte, bu üçgen içerisindeki konumların rastgele olması sağlanmıştır.
 
 - Oyun 2D olmakla birlikte, topların 3D hareket etmeleri sağlanmıştır.
