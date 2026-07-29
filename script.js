@@ -5,6 +5,7 @@ const powerSegments = document.querySelectorAll('.segment');
 const powerSegmentsContainer = document.getElementById('power-segments');
 const restartBtn = document.getElementById('restartBtn');
 const turnCountEl = document.getElementById('turnCount');
+const reflectionBtn = document.getElementById('reflectionBtn');
 
 let displayPowerLevel = 5;
 let physicsActualPower = 20;
@@ -19,6 +20,18 @@ const maxTurns = 50;
 
 let isTurnActive = false;
 let gameOverState = "PLAYING";
+let isReflectionEnabled = false;
+
+function toggleReflection() {
+    isReflectionEnabled = !isReflectionEnabled;
+    if (reflectionBtn) {
+        reflectionBtn.classList.toggle('active', isReflectionEnabled);
+    }
+}
+
+if (reflectionBtn) {
+    reflectionBtn.addEventListener('click', toggleReflection);
+}
 
 const ballColors = [
     '#ffffff', // 0: Beyaz
@@ -127,14 +140,14 @@ class Ball {
         });
     }
 
-    update() {
+    updateSubStep(dt) {
         if (this.inPocket) return;
-        this.x += this.vx;
-        this.y += this.vy;
+        this.x += this.vx * dt;
+        this.y += this.vy * dt;
 
         const speed = Math.hypot(this.vx, this.vy);
         if (speed > 0.02 && this.points.length > 0) {
-            const rotSpeed = speed / this.radius;
+            const rotSpeed = (speed / this.radius) * dt;
             const ax = -this.vy / speed;
             const ay = this.vx / speed;
             const cosA = Math.cos(rotSpeed);
@@ -150,8 +163,9 @@ class Ball {
             });
         }
 
-        this.vx *= friction;
-        this.vy *= friction;
+        const frictionSub = Math.pow(friction, dt);
+        this.vx *= frictionSub;
+        this.vy *= frictionSub;
 
         if (Math.abs(this.vx) < 0.02) this.vx = 0;
         if (Math.abs(this.vy) < 0.02) this.vy = 0;
@@ -222,8 +236,8 @@ function resolveCollision(b1, b2) {
 
     if (dist < b1.radius + b2.radius) {
         const overlap = (b1.radius + b2.radius) - dist;
-        const nx = xDist / dist;
-        const ny = yDist / dist;
+        const nx = dist > 0 ? xDist / dist : 1;
+        const ny = dist > 0 ? yDist / dist : 0;
         b1.x -= nx * overlap * 0.5;
         b1.y -= ny * overlap * 0.5;
         b2.x += nx * overlap * 0.5;
@@ -253,6 +267,9 @@ function updatePower(level) {
 }
 
 window.addEventListener('keydown', (e) => {
+    if (e.key === 'x' || e.key === 'X') {
+        toggleReflection();
+    }
     if (gameOverState !== "PLAYING" || currentTurn === 1) return;
     if (['1', '2', '3', '4', '5'].includes(e.key)) {
         updatePower(parseInt(e.key));
@@ -313,12 +330,16 @@ function animate() {
     });
 
     if (gameOverState === "PLAYING") {
-        for (let i = 0; i < balls.length; i++) {
-            for (let j = i + 1; j < balls.length; j++) {
-                resolveCollision(balls[i], balls[j]);
+        const subSteps = 8;
+        const dt = 1 / subSteps;
+        for (let step = 0; step < subSteps; step++) {
+            balls.forEach(ball => ball.updateSubStep(dt));
+            for (let i = 0; i < balls.length; i++) {
+                for (let j = i + 1; j < balls.length; j++) {
+                    resolveCollision(balls[i], balls[j]);
+                }
             }
         }
-        balls.forEach(ball => ball.update());
     }
 
     balls.forEach(ball => ball.draw());
@@ -326,56 +347,136 @@ function animate() {
     const allStopped = balls.every(ball => ball.vx === 0 && ball.vy === 0);
 
     if (allStopped && gameOverState === "PLAYING") {
-        ctx.beginPath();
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
-        ctx.lineWidth = 1.5;
-        ctx.setLineDash([5, 5]);
-        ctx.moveTo(whiteBall.x, whiteBall.y);
-        ctx.lineTo(mouseX, mouseY);
-        ctx.stroke();
-
         const dx = mouseX - whiteBall.x;
         const dy = mouseY - whiteBall.y;
-        const angle = Math.atan2(dy, dx);
-        const dirX = Math.cos(angle);
-        const dirY = Math.sin(angle);
+        const distance = Math.hypot(dx, dy);
 
-        let closestBall = null;
-        let minDist = Infinity;
+        if (distance > 0) {
+            const dirX = dx / distance;
+            const dirY = dy / distance;
 
-        balls.forEach(ball => {
-            if (ball === whiteBall || ball.inPocket) return;
-            const ballToWhiteX = ball.x - whiteBall.x;
-            const ballToWhiteY = ball.y - whiteBall.y;
-            const proj = ballToWhiteX * dirX + ballToWhiteY * dirY;
-            if (proj > 0) {
-                const offX = ballToWhiteX - proj * dirX;
-                const offY = ballToWhiteY - proj * dirY;
-                const offDist = Math.hypot(offX, offY);
-                if (offDist < ballRadius * 2) {
-                    const distToCollision = proj - Math.sqrt(Math.pow(ballRadius * 2, 2) - Math.pow(offDist, 2));
-                    if (distToCollision < minDist) {
-                        minDist = distToCollision;
-                        closestBall = ball;
+            let closestBall = null;
+            let minDist = Infinity;
+
+            balls.forEach(ball => {
+                if (ball === whiteBall || ball.inPocket) return;
+                const ballToWhiteX = ball.x - whiteBall.x;
+                const ballToWhiteY = ball.y - whiteBall.y;
+                const proj = ballToWhiteX * dirX + ballToWhiteY * dirY;
+                if (proj > 0) {
+                    const offX = ballToWhiteX - proj * dirX;
+                    const offY = ballToWhiteY - proj * dirY;
+                    const offDist = Math.hypot(offX, offY);
+                    if (offDist < ballRadius * 2) {
+                        const distToCollision = proj - Math.sqrt(Math.pow(ballRadius * 2, 2) - Math.pow(offDist, 2));
+                        if (distToCollision < minDist) {
+                            minDist = distToCollision;
+                            closestBall = ball;
+                        }
                     }
                 }
-            }
-        });
-
-        if (closestBall) {
-            const collisionX = whiteBall.x + dirX * minDist;
-            const collisionY = whiteBall.y + dirY * minDist;
-            const targetAngle = Math.atan2(closestBall.y - collisionY, closestBall.x - collisionX);
+            });
 
             ctx.beginPath();
-            ctx.strokeStyle = 'rgba(255, 235, 59, 0.55)';
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
             ctx.lineWidth = 1.5;
             ctx.setLineDash([5, 5]);
-            ctx.moveTo(closestBall.x, closestBall.y);
-            ctx.lineTo(closestBall.x + Math.cos(targetAngle) * 800, closestBall.y + Math.sin(targetAngle) * 800);
-            ctx.stroke();
+
+            if (closestBall) {
+                const collisionX = whiteBall.x + dirX * minDist;
+                const collisionY = whiteBall.y + dirY * minDist;
+
+                ctx.moveTo(whiteBall.x, whiteBall.y);
+                ctx.lineTo(collisionX, collisionY);
+                ctx.stroke();
+
+                const targetAngle = Math.atan2(closestBall.y - collisionY, closestBall.x - collisionX);
+
+                ctx.beginPath();
+                ctx.strokeStyle = 'rgba(255, 235, 59, 0.55)';
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([5, 5]);
+                ctx.moveTo(closestBall.x, closestBall.y);
+                ctx.lineTo(closestBall.x + Math.cos(targetAngle) * 1500, closestBall.y + Math.sin(targetAngle) * 1500);
+                ctx.stroke();
+            } else {
+                let tX = Infinity;
+                let tY = Infinity;
+
+                if (dirX > 0) tX = (canvas.width - whiteBall.x) / dirX;
+                else if (dirX < 0) tX = (0 - whiteBall.x) / dirX;
+
+                if (dirY > 0) tY = (canvas.height - whiteBall.y) / dirY;
+                else if (dirY < 0) tY = (0 - whiteBall.y) / dirY;
+
+                let tHit = Math.min(tX, tY);
+                let hitX = whiteBall.x + dirX * tHit;
+                let hitY = whiteBall.y + dirY * tHit;
+
+                ctx.moveTo(whiteBall.x, whiteBall.y);
+                ctx.lineTo(hitX, hitY);
+
+                if (isReflectionEnabled) {
+                    let reflectedDirX = dirX;
+                    let reflectedDirY = dirY;
+
+                    if (tX < tY) {
+                        reflectedDirX = -dirX;
+                    } else if (tY < tX) {
+                        reflectedDirY = -dirY;
+                    } else {
+                        reflectedDirX = -dirX;
+                        reflectedDirY = -dirY;
+                    }
+
+                    let closestBallRefl = null;
+                    let minDistRefl = Infinity;
+
+                    balls.forEach(ball => {
+                        if (ball === whiteBall || ball.inPocket) return;
+                        const ballToHitX = ball.x - hitX;
+                        const ballToHitY = ball.y - hitY;
+                        const proj = ballToHitX * reflectedDirX + ballToHitY * reflectedDirY;
+                        if (proj > 0) {
+                            const offX = ballToHitX - proj * reflectedDirX;
+                            const offY = ballToHitY - proj * reflectedDirY;
+                            const offDist = Math.hypot(offX, offY);
+                            if (offDist < ballRadius * 2) {
+                                const distToCollision = proj - Math.sqrt(Math.pow(ballRadius * 2, 2) - Math.pow(offDist, 2));
+                                if (distToCollision > 0 && distToCollision < minDistRefl) {
+                                    minDistRefl = distToCollision;
+                                    closestBallRefl = ball;
+                                }
+                            }
+                        }
+                    });
+
+                    if (closestBallRefl) {
+                        const reflCollisionX = hitX + reflectedDirX * minDistRefl;
+                        const reflCollisionY = hitY + reflectedDirY * minDistRefl;
+
+                        ctx.lineTo(reflCollisionX, reflCollisionY);
+                        ctx.stroke();
+
+                        const targetAngle = Math.atan2(closestBallRefl.y - reflCollisionY, closestBallRefl.x - reflCollisionX);
+
+                        ctx.beginPath();
+                        ctx.strokeStyle = 'rgba(255, 235, 59, 0.55)';
+                        ctx.lineWidth = 1.5;
+                        ctx.setLineDash([5, 5]);
+                        ctx.moveTo(closestBallRefl.x, closestBallRefl.y);
+                        ctx.lineTo(closestBallRefl.x + Math.cos(targetAngle) * 1500, closestBallRefl.y + Math.sin(targetAngle) * 1500);
+                        ctx.stroke();
+                    } else {
+                        ctx.lineTo(hitX + reflectedDirX * 1500, hitY + reflectedDirY * 1500);
+                        ctx.stroke();
+                    }
+                } else {
+                    ctx.stroke();
+                }
+            }
+            ctx.setLineDash([]);
         }
-        ctx.setLineDash([]);
     }
 
     if (isTurnActive && allStopped) {

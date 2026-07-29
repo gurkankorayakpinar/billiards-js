@@ -41,6 +41,24 @@ body {
     border: 1px solid #333;
 }
 
+#reflectionBtn {
+    color: #fff;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+#reflectionBtn:hover {
+    background-color: #3a3a3a;
+}
+
+#reflectionBtn.active {
+    border-color: #2196f3;
+    color: #2196f3;
+}
+
 .label {
     font-weight: bold;
     font-size: 14px;
@@ -50,7 +68,6 @@ body {
     display: flex;
     gap: 4px;
     width: 141px;
-    /* 5 adet 25px segment + 4 adet 4px gap = 141px */
 }
 
 #power-segments.first-hit {

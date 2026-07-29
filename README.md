@@ -10,7 +10,13 @@
 
 - Beyaz topun izleyeceği yol, beyaz çizgi ile gösterilmektedir.
 
+- Yansıma özelliği "x" tuşu ile açılabilmekte olup, masanın herhangi bir kenarına çarptıktan sonraki rotayı da göstermektedir.
+
+- Yansıma özelliği, toplara çarptıktan sonra tahmini rotayı göstermemektedir.
+
 - Beyaz topun isabet edeceği topun izleyeceği tahmini yol, sarı çizgi ile gösterilmektedir.
+
+- Sarı çizgi ile daha isabetli tahmin yapılabilmesi için, Sub-step Physics Simulation ve Ray-Circle Intersection yöntemlerinden yararlanılmıştır.
 
 - İlk tur için vuruş şiddeti 7 olarak ayarlanmıştır. Sonraki turlar içinse vuruş şiddetinin 1-5 arasında olması sağlanmış olup, default olarak 3 şiddeti seçilmiştir. Vuruş şiddetini ayarlamak için 1, 2, 3, 4 ve 5 tuşları kullanılmalıdır.
 
