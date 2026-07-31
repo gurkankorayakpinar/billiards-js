@@ -283,7 +283,8 @@ window.addEventListener('mousemove', (e) => {
     mouseY = e.clientY - rect.top;
 });
 
-window.addEventListener('mousedown', () => {
+window.addEventListener('mousedown', (e) => {
+    if (e.button !== 0) return;
     if (gameOverState !== "PLAYING") return;
     const allStopped = balls.every(ball => ball.vx === 0 && ball.vy === 0);
 
@@ -302,7 +303,11 @@ window.addEventListener('mousedown', () => {
     }
 });
 
-document.addEventListener('contextmenu', (event) => event.preventDefault());
+// "Sağ tık ile menü açma" özelliği devre dışı
+document.addEventListener('contextmenu', (event) => {
+    event.preventDefault();
+});
+
 restartBtn.addEventListener('click', () => initGame());
 
 function drawEndScreen() {
