@@ -21,3 +21,5 @@
 - Topların başlangıç dizilimi her defasında üçgen biçiminde olmakla birlikte, bu üçgen içerisindeki renk dağılımının rastgele olması sağlanmıştır.
 
 - Oyun 2D olmakla birlikte, topların 3D hareket etmeleri sağlanmıştır.
+
+- Mouse "sağ tık" ile menü açma özelliği devre dışı bırakılmıştır.
